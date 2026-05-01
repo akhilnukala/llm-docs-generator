@@ -136,11 +136,6 @@ const OPTIONAL_TOPIC_ORDER = [
   ]],
 ];
 
-// CRUD-style ordering for API methods within a tag group.
-// Lower number = listed first. POST (create) -> GET (list) -> GET (by id) -> POST (update) -> DELETE
-const _METHOD_ORDER = { post: 0, get: 1, delete: 2 };
-void _METHOD_ORDER;
-
 // ---------------------------------------------------------------------------
 // Utility helpers
 // ---------------------------------------------------------------------------
@@ -1356,7 +1351,7 @@ function generateLlmsTxt(entries, sourceHash, generationTs, { includeInlineExamp
 // Orchestration
 // ---------------------------------------------------------------------------
 
-function run() {
+function mountPublicFiles() {
   // Main entry point - parse, generate, write.
   const products = loadInput(INPUT_FILE);
   const sourceHash = fileSha256(INPUT_FILE);
@@ -1368,7 +1363,10 @@ function run() {
     const source = asObject(product._source);
 
     if (Object.keys(source).length === 0) {
-      log.warning("Skipping entry with empty _source: %s", asString(product._id ?? ""));
+      log.warning(
+        "Skipping entry with empty _source: %s",
+        asString(product._id ?? ""),
+      );
       continue;
     }
 
@@ -1378,7 +1376,9 @@ function run() {
   }
 
   const kindOrder = { doc: 0, "yaml-overview": 1, api: 2 };
-  rawEntries.sort((a, b) => compareTuple([kindOrder[a[0]] ?? 9, a[1]], [kindOrder[b[0]] ?? 9, b[1]]));
+  rawEntries.sort((a, b) =>
+    compareTuple([kindOrder[a[0]] ?? 9, a[1]], [kindOrder[b[0]] ?? 9, b[1]]),
+  );
 
   const entries = deduplicateSlugs(rawEntries);
 
@@ -1410,7 +1410,7 @@ function run() {
 
 function main() {
   try {
-    run();
+    mountPublicFiles();
   } catch (error) {
     if (!error?.alreadyLogged) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -1422,4 +1422,4 @@ function main() {
 
 main();
 
-export { run };
+export { mountPublicFiles };
